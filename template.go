@@ -38,11 +38,16 @@ type Service struct {
   Xfleet []string
 }
 
+var template_dir string
+var root string
+
 func main() {
   // Figure out which directory we are going to prep files for
+  template_def := os.ExpandEnv("$GOPATH/src/github.com/winkapp/clc/templates")
+  flag.StringVar(&template_dir, "templates", template_def, "Your templates.")
+  flag.StringVar(&root, "root", "./", "Directory for configs and output.")
   flag.Parse()
   command := flag.Arg(0)
-  root := flag.Arg(1)
 
   switch command {
   case "cc": cc(root)
@@ -95,15 +100,6 @@ func cc(path string) {
 	checkError(err)
 }
 
-func unitsTemplate(data *Service) (t *template.Template) {
-  templ := getFile("./templates/service.template")
-
-  t = template.New("Service Template")
-  t, err := t.Parse(templ)
-  checkError(err)
-  return
-}
-
 func ccData(path string) (data CloudConfig) {
   // Open the files document for file includes
   file1 := File{
@@ -124,23 +120,18 @@ func ccData(path string) (data CloudConfig) {
   return
 }
 
-func ccTemplate(data CloudConfig) (t *template.Template) {
-  // Get cloud config template
-  templ := getFile("./templates/cloud-config.template")
+func unitsTemplate(data *Service) (t *template.Template) {
+  t = getTemplate("Service Template", "service.template")
+  return
+}
 
-  t = template.New("Cloud Config Template")
-	t, err := t.Parse(templ)
-	checkError(err)
+func ccTemplate(data CloudConfig) (t *template.Template) {
+  t = getTemplate("Cloud Config Template", "cloud-config.template")
   return
 }
 
 func udTemplate(data CloudConfig) (t *template.Template) {
-  // Get user data template
-  templ := getFile("./templates/user-data.template")
-
-  t = template.New("User Data Template")
-  t, err := t.Parse(templ)
-  checkError(err)
+  t = getTemplate("User Data Template", "user-data.template")
   return
 }
 
@@ -174,9 +165,18 @@ func writeCloudConfig(t *template.Template, data CloudConfig) {
 
 }
 
+func getTemplate(name string, filename string) (t *template.Template) {
+  templ := getFile(template_dir + "/" + filename)
+
+  t = template.New(name)
+  t, err := t.Parse(templ)
+  checkError(err)
+  return
+}
+
 func checkError(err error) {
 	if err != nil {
-		fmt.Println("Fatal error ", err.Error())
+		fmt.Println("Fatal error:", err.Error())
 		os.Exit(1)
 	}
 }
