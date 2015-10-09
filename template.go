@@ -51,10 +51,25 @@ func main() {
 
   switch command {
   case "cc": cc(root)
-  case "ud": ud(root)
+  case "vagrant": vagrant(root)
   case "units": units(root)
+  case "new": newCluster(root)
   }
 
+}
+
+func newCluster(path string) {
+  cc(root)
+  vagrant(root)
+  units(root)
+  return
+}
+
+func vagrant(path string) {
+  ud(path)
+  copyFile(path + "/Vagrantfile", template_dir + "/Vagrantfile.template")
+  copyFile(path + "/config.rb", template_dir + "/config.rb.template")
+  return
 }
 
 func units(path string) {
@@ -161,8 +176,13 @@ func getFile(path string) string {
   return string(getFileBytes(path))
 }
 
-func writeCloudConfig(t *template.Template, data CloudConfig) {
-
+func copyFile(dstPath string, srcPath string) {
+  src, err := ioutil.ReadFile(srcPath)
+  checkError(err)
+  mode := int(0644)
+  err = ioutil.WriteFile(dstPath, src, os.FileMode(mode))
+  checkError(err)
+  return
 }
 
 func getTemplate(name string, filename string) (t *template.Template) {
