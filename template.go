@@ -8,6 +8,7 @@ import (
   "io/ioutil"
   "bufio"
   "gopkg.in/yaml.v2"
+  "github.com/winkapp/libclc"
 )
 
 type File struct {
@@ -22,30 +23,16 @@ type CloudConfig struct {
   Files []*File
 }
 
-type Units struct {
-  Services []*Service
-}
-
-type Service struct {
-  Name string
-  Image string
-  Command string
-  Type string
-  Filename string
-  Restart string
-  Envs []string
-  Ports []string
-  Xfleet []string
-}
-
 var template_dir string
 var root string
+var config_file string
 
 func main() {
   // Figure out which directory we are going to prep files for
   template_def := os.ExpandEnv("$GOPATH/src/github.com/winkapp/clc/templates")
   flag.StringVar(&template_dir, "templates", template_def, "Your templates.")
   flag.StringVar(&root, "root", "./", "Directory for configs and output.")
+  flag.StringVar(&config_file, "config", "clc.yaml", "Optional config file.")
   flag.Parse()
   command := flag.Arg(0)
 
@@ -74,17 +61,18 @@ func vagrant(path string) {
 
 func units(path string) {
   unitsYaml := getFileBytes(path + "/units.yaml")
-  var units Units
+  var units libclc.UnitConfig
   err := yaml.Unmarshal(unitsYaml, &units)
   checkError(err)
-  for _, service := range units.Services {
+  for _, service := range units.Units {
     t := unitsTemplate(service)
     fileName := unitFileName(service)
+
     f, err := os.Create(path + "/units/" + fileName)
     checkError(err)
     defer f.Close()
     w := bufio.NewWriter(f)
-    err = t.Execute(w, service)
+    libclc.MakeUnit(t, service, w)
     checkError(err)
     w.Flush()
   }
@@ -135,7 +123,7 @@ func ccData(path string) (data CloudConfig) {
   return
 }
 
-func unitsTemplate(data *Service) (t *template.Template) {
+func unitsTemplate(data *libclc.Unit) (t *template.Template) {
   t = getTemplate("Service Template", "service.template")
   return
 }
@@ -150,7 +138,7 @@ func udTemplate(data CloudConfig) (t *template.Template) {
   return
 }
 
-func unitFileName(service *Service) string {
+func unitFileName(service *libclc.Unit) string {
   switch service.Type {
   case "single":
     service.Filename = (service.Name + ".service")
