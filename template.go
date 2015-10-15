@@ -6,7 +6,6 @@ import (
 	"text/template"
 	"os"
   "io/ioutil"
-  "bufio"
   "gopkg.in/yaml.v2"
   "github.com/winkapp/libclc"
 )
@@ -64,18 +63,9 @@ func units(path string) {
   var units libclc.UnitConfig
   err := yaml.Unmarshal(unitsYaml, &units)
   checkError(err)
-  for _, service := range units.Units {
-    t := unitsTemplate(service)
-    fileName := unitFileName(service)
-
-    f, err := os.Create(path + "/units/" + fileName)
-    checkError(err)
-    defer f.Close()
-    w := bufio.NewWriter(f)
-    libclc.MakeUnit(t, service, w)
-    checkError(err)
-    w.Flush()
-  }
+  t := unitsTemplate()
+  err = libclc.WriteUnits(&units, t, path + "/units")
+  checkError(err)
 }
 
 func ud(path string) {
@@ -123,7 +113,7 @@ func ccData(path string) (data CloudConfig) {
   return
 }
 
-func unitsTemplate(data *libclc.Unit) (t *template.Template) {
+func unitsTemplate() (t *template.Template) {
   t = getTemplate("Service Template", "service.template")
   return
 }
@@ -136,17 +126,6 @@ func ccTemplate(data CloudConfig) (t *template.Template) {
 func udTemplate(data CloudConfig) (t *template.Template) {
   t = getTemplate("User Data Template", "user-data.template")
   return
-}
-
-func unitFileName(service *libclc.Unit) string {
-  switch service.Type {
-  case "single":
-    service.Filename = (service.Name + ".service")
-  case "multi":
-    service.Filename = (service.Name + "@.service")
-  }
-
-  return service.Filename
 }
 
 func addFile(path string, f os.FileInfo, err error) error {
