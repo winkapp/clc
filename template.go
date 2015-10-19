@@ -34,6 +34,8 @@ func main() {
   err := yaml.Unmarshal(configYaml, &config)
   checkError(err)
 
+  getFilesFromConfig()
+
   switch command {
   case "cc": cc(root)
   case "vagrant": vagrant(root)
@@ -68,16 +70,8 @@ func units(path string) {
 }
 
 func ud(p string) {
-  // TODO: Open the files document for file includes
-  file1 := libclc.File{
-    Content: getFile("./etcd_env.sh"),
-    Path: "/home/core/etcd_env.sh",
-    Owner: "core:core",
-    Permissions: "744",
-  }
-
   data := libclc.CloudConfig{
-    Files: []*libclc.File{&file1},
+    Files: config.Files,
   }
 
   t := udTemplate(data)
@@ -107,18 +101,11 @@ func cc(p string) {
 }
 
 func ccData(path string) (data libclc.CloudConfig) {
-  // Open the files document for file includes
-  file1 := libclc.File{
-    Content: getFile("./etcd_env.sh"),
-    Path: "/home/core/etcd_env.sh",
-    Owner: "core:core",
-    Permissions: "744",
-  }
 
   // Include files on cloud config
   data = libclc.CloudConfig{
     DiscoveryUrl: config.Discovery,
-    Files: []*libclc.File{&file1},
+    Files: config.Files,
   }
   return
 }
@@ -146,6 +133,12 @@ func vfTemplate(data libclc.Vagrantfile) (t *template.Template) {
 func crbTemplate(data libclc.Configrb) (t *template.Template) {
   t = getTemplate("Config.rb", "config.rb.template")
   return
+}
+
+func getFilesFromConfig() () {
+  for _, file := range config.Files {
+    file.Content = getFile(file.HostPath)
+  }
 }
 
 func getFileBytes(path string) []byte {
