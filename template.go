@@ -56,7 +56,7 @@ func units(path string) {
   checkError(err)
 }
 
-func ud(path string) {
+func ud(p string) {
   // TODO: Open the files document for file includes
   file1 := libclc.File{
     Content: getFile("./etcd_env.sh"),
@@ -70,14 +70,14 @@ func ud(path string) {
   }
 
   t := udTemplate(data)
-  err := libclc.WriteUserData(&data, t, path + "/user-data")
+  err := libclc.WriteUserData(&data, t, path.Join(p, "user-data"))
   checkError(err)
 }
 
-func cc(path string) {
-  data := ccData(path)
+func cc(p string) {
+  data := ccData(p)
   t := ccTemplate(data)
-  err := libclc.WriteCloudConfig(&data, t, path + "/cloud-config")
+  err := libclc.WriteCloudConfig(&data, t, path.Join(p, "cloud-config"))
 	checkError(err)
 }
 
