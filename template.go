@@ -11,17 +11,27 @@ import (
   "path"
 )
 
-var template_dir string
+type ClcConfig struct {
+  Discovery string
+  Templates string
+  Files []*libclc.File
+}
+
 var root string
 var config_file string
+var config ClcConfig
 
 func main() {
   // Figure out which directory we are going to prep files for
-  flag.StringVar(&template_dir, "templates", "", "Your templates.")
   flag.StringVar(&root, "root", "./", "Directory for configs and output.")
   flag.StringVar(&config_file, "config", "clc.yaml", "Optional config file.")
   flag.Parse()
   command := flag.Arg(0)
+
+  // Initialize the config
+  configYaml := getFileBytes(config_file)
+  err := yaml.Unmarshal(configYaml, &config)
+  checkError(err)
 
   switch command {
   case "cc": cc(root)
@@ -104,12 +114,9 @@ func ccData(path string) (data libclc.CloudConfig) {
     Permissions: "744",
   }
 
-  // Open the document for the discovery url
-  discovery_url := getFile(path + "/discovery_url")
-
   // Include files on cloud config
   data = libclc.CloudConfig{
-    DiscoveryUrl: discovery_url,
+    DiscoveryUrl: config.Discovery,
     Files: []*libclc.File{&file1},
   }
   return
@@ -152,15 +159,15 @@ func getFile(path string) string {
 
 func getTemplate(name string, filename string) (t *template.Template) {
   // If a template directory not set, use default template.
-  if template_dir == "" {
+  if config.Templates == "" {
     return nil
   }
   // If a template file does not exist, use default template.
-  _, err := os.Stat(path.Join(template_dir, filename))
+  _, err := os.Stat(path.Join(config.Templates, filename))
   if err != nil {
     return nil
   }
-  templ := getFile(path.Join(template_dir, filename))
+  templ := getFile(path.Join(config.Templates, filename))
 
   t = template.New(name)
   t, err = t.Parse(templ)
