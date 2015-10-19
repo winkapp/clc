@@ -11,18 +11,6 @@ import (
   "path"
 )
 
-type File struct {
-  Path string
-  Content string
-  Owner string
-  Permissions string
-}
-
-type CloudConfig struct {
-  DiscoveryUrl string
-  Files []*File
-}
-
 var template_dir string
 var root string
 var config_file string
