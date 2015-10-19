@@ -8,6 +8,7 @@ import (
   "io/ioutil"
   "gopkg.in/yaml.v2"
   "github.com/winkapp/libclc"
+  "path"
 )
 
 type File struct {
@@ -28,8 +29,7 @@ var config_file string
 
 func main() {
   // Figure out which directory we are going to prep files for
-  template_def := os.ExpandEnv("$GOPATH/src/github.com/winkapp/clc/templates")
-  flag.StringVar(&template_dir, "templates", template_def, "Your templates.")
+  flag.StringVar(&template_dir, "templates", "", "Your templates.")
   flag.StringVar(&root, "root", "./", "Directory for configs and output.")
   flag.StringVar(&config_file, "config", "clc.yaml", "Optional config file.")
   flag.Parse()
@@ -153,10 +153,19 @@ func copyFile(dstPath string, srcPath string) {
 }
 
 func getTemplate(name string, filename string) (t *template.Template) {
-  templ := getFile(template_dir + "/" + filename)
+  // If a template directory not set, use default template.
+  if template_dir == "" {
+    return nil
+  }
+  // If a template file does not exist, use default template.
+  _, err := os.Stat(path.Join(template_dir, filename))
+  if err != nil {
+    return nil
+  }
+  templ := getFile(path.Join(template_dir, filename))
 
   t = template.New(name)
-  t, err := t.Parse(templ)
+  t, err = t.Parse(templ)
   checkError(err)
   return
 }
