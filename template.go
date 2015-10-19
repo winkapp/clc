@@ -89,7 +89,7 @@ func ud(path string) {
 func cc(path string) {
   data := ccData(path)
   t := ccTemplate(data)
-  err := t.Execute(os.Stdout, data)
+  err := libclc.WriteCloudConfig(&data, t, path + "/cloud-config")
 	checkError(err)
 }
 
