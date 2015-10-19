@@ -70,19 +70,19 @@ func units(path string) {
 
 func ud(path string) {
   // TODO: Open the files document for file includes
-  file1 := File{
+  file1 := libclc.File{
     Content: getFile("./etcd_env.sh"),
     Path: "/home/core/etcd_env.sh",
     Owner: "core:core",
     Permissions: "744",
   }
 
-  data := CloudConfig{
-    Files: []*File{&file1},
+  data := libclc.CloudConfig{
+    Files: []*libclc.File{&file1},
   }
 
   t := udTemplate(data)
-  err := t.Execute(os.Stdout, data)
+  err := libclc.WriteUserData(&data, t, path + "/user-data")
   checkError(err)
 }
 
@@ -93,9 +93,9 @@ func cc(path string) {
 	checkError(err)
 }
 
-func ccData(path string) (data CloudConfig) {
+func ccData(path string) (data libclc.CloudConfig) {
   // Open the files document for file includes
-  file1 := File{
+  file1 := libclc.File{
     Content: getFile("./etcd_env.sh"),
     Path: "/home/core/etcd_env.sh",
     Owner: "core:core",
@@ -106,9 +106,9 @@ func ccData(path string) (data CloudConfig) {
   discovery_url := getFile(path + "/discovery_url")
 
   // Include files on cloud config
-  data = CloudConfig{
+  data = libclc.CloudConfig{
     DiscoveryUrl: discovery_url,
-    Files: []*File{&file1},
+    Files: []*libclc.File{&file1},
   }
   return
 }
@@ -118,12 +118,12 @@ func unitsTemplate() (t *template.Template) {
   return
 }
 
-func ccTemplate(data CloudConfig) (t *template.Template) {
+func ccTemplate(data libclc.CloudConfig) (t *template.Template) {
   t = getTemplate("Cloud Config Template", "cloud-config.template")
   return
 }
 
-func udTemplate(data CloudConfig) (t *template.Template) {
+func udTemplate(data libclc.CloudConfig) (t *template.Template) {
   t = getTemplate("User Data Template", "user-data.template")
   return
 }
