@@ -41,8 +41,8 @@ func newCluster(path string) {
 
 func vagrant(path string) {
   ud(path)
-  copyFile(path + "/Vagrantfile", template_dir + "/Vagrantfile.template")
-  copyFile(path + "/config.rb", template_dir + "/config.rb.template")
+  vf(path)
+  crb(path)
   return
 }
 
@@ -74,6 +74,20 @@ func ud(p string) {
   checkError(err)
 }
 
+func vf(p string) {
+  data := libclc.Vagrantfile{}
+  t := vfTemplate(data)
+  err := libclc.WriteVagrantfile(&data, t, path.Join(p, "Vagrantfile"))
+  checkError(err)
+}
+
+func crb(p string) {
+  data := libclc.Configrb{}
+  t := crbTemplate(data)
+  err := libclc.WriteConfigrb(&data, t, path.Join(p, "config.rb"))
+  checkError(err)
+}
+
 func cc(p string) {
   data := ccData(p)
   t := ccTemplate(data)
@@ -102,23 +116,28 @@ func ccData(path string) (data libclc.CloudConfig) {
 }
 
 func unitsTemplate() (t *template.Template) {
-  t = getTemplate("Service Template", "service.template")
+  t = getTemplate("Service", "service.template")
   return
 }
 
 func ccTemplate(data libclc.CloudConfig) (t *template.Template) {
-  t = getTemplate("Cloud Config Template", "cloud-config.template")
+  t = getTemplate("Cloud Config", "cloud-config.template")
   return
 }
 
 func udTemplate(data libclc.CloudConfig) (t *template.Template) {
-  t = getTemplate("User Data Template", "user-data.template")
+  t = getTemplate("User Data", "user-data.template")
   return
 }
 
-func addFile(path string, f os.FileInfo, err error) error {
-  fmt.Printf("Visited: %s\n", path)
-  return nil
+func vfTemplate(data libclc.Vagrantfile) (t *template.Template) {
+  t = getTemplate("Vagrantfile", "Vagrantfile.template")
+  return
+}
+
+func crbTemplate(data libclc.Configrb) (t *template.Template) {
+  t = getTemplate("Config.rb", "config.rb.template")
+  return
 }
 
 func getFileBytes(path string) []byte {
@@ -129,15 +148,6 @@ func getFileBytes(path string) []byte {
 
 func getFile(path string) string {
   return string(getFileBytes(path))
-}
-
-func copyFile(dstPath string, srcPath string) {
-  src, err := ioutil.ReadFile(srcPath)
-  checkError(err)
-  mode := int(0644)
-  err = ioutil.WriteFile(dstPath, src, os.FileMode(mode))
-  checkError(err)
-  return
 }
 
 func getTemplate(name string, filename string) (t *template.Template) {
