@@ -14,6 +14,7 @@ import (
 type ClcConfig struct {
   Discovery string
   Templates string
+  Units string
   Files []*libclc.File
 }
 
@@ -57,7 +58,7 @@ func vagrant(path string) {
 }
 
 func units(path string) {
-  unitsYaml := getFileBytes(path + "/units.yaml")
+  unitsYaml := getFileBytes(config.Units)
   var units libclc.UnitConfig
   err := yaml.Unmarshal(unitsYaml, &units)
   checkError(err)
