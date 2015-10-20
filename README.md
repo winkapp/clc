@@ -39,6 +39,16 @@ with options mirroring those of your cloud config.
 `-root`
 
   Points to root directory for configs and output. (default "./")
+  
+### config file
+
+Clc config (default is clc.yaml)
+
+```
+discovery: { discovery url like https://discovery.etcd.io/3245sfgsdfgsdgsdfg34 }
+units: { path to your units config file }
+templates: { path to your template directory. optional }
+```
 
 ## rationale
 
