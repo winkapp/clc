@@ -2,9 +2,9 @@ package main
 
 import (
   "flag"
-	"fmt"
-	"text/template"
-	"os"
+  "fmt"
+  "text/template"
+  "os"
   "io/ioutil"
   "gopkg.in/yaml.v2"
   "github.com/winkapp/libclc"
