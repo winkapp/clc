@@ -46,13 +46,26 @@ Clc config (default is clc.yaml). This file is used to set the discovery url for
 
 ```
 discovery: { discovery url like https://discovery.etcd.io/3245sfgsdfgsdgsdfg34 }
-units: { path to your units config file }
+
+unit_directory: { path to your units config file }
+
 templates: { path to your template directory. optional }
+
 files: {specification for files to be included in cloud-config and user-data, to be included on new cluster machines}
-  - hostpath: {path to the file on the current systen, relative to the directory specified as the clc root}
+  - host_path: {path to the file on the current systen, relative to the directory specified as the clc root}
     path: {path the the desired destination of the file on cluster machines}
     owner: {desired owner of the file on cluster machines}
     permissions: {desired permissions of the file on cluster machines}
+    
+unit_config:
+  units:
+    - name: {name of the service}
+      type: {multi|single - multi option names the file service-name@.service to enable running multiple instances}
+      restart: {always|no - always will restart the service after any exit}
+      image: {docker image to run}
+      command: {command to pass when starting container. leave blank to use default container command}
+      evironment:
+        - SOME_ENV_VARIABLE {used to specify environmental variables to pass to the container. the actual values are set in etcd.}
 ```
 
 ## rationale
