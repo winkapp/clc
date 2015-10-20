@@ -65,8 +65,15 @@ unit_config:
       image: {docker image to run}
       command: {command to pass when starting container. leave blank to use default container command}
       evironment:
-        - SOME_ENV_VARIABLE {used to specify environmental variables to pass to the container. the actual values are set in etcd.}
+        - SOME_ENV_VARIABLE_KEY {used to specify environmental variables to pass to the container. the actual values are set in etcd.}
 ```
+
+#### note on environmental variables
+
+Although the intention of this tool is to keep our clusters as close to stock as possible for simplicity, we make one exception to facilitate simple usage of etcd-backed environmental variables. Etcd is an incredible tool for sharing ephemeral information such as endpoints for services and api credentials across a cluster. We make use of it as a backing layer to provide env variables to our containers. If you would like to take advantage of this for your own units, first make sure the name/key of the env variable you want passed to your service is in the unit definition in your config file under the `environment` key. See above for example. After that, set the value of the env variable in etc like so:
+    etcdctl set /services/{your-service-name}/env/SOME_ENV_VARIABLE_KEY value
+
+Please note that services will not be restarted automatically if the etcd entry for an env variable changes; the env variables are passed on container startup.
 
 ## rationale
 
@@ -93,3 +100,7 @@ And finally deploy to production on an IaaS using the generated cloud-config fil
 ```
 clc cc
 ```
+
+## libclc
+
+The actual code for creating unit files etc is actually kept in [libclc](https://github.com/winkapp/libclc). The clc project is just a command line tool that takes advantage of libclc. These two things are decoupled because it is sometimes useful to use the libclc logic in unrelated projects to do things like generate unit files on the fly and send them to a cluster programatically.
