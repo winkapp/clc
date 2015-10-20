@@ -42,12 +42,17 @@ with options mirroring those of your cloud config.
   
 ### config file
 
-Clc config (default is clc.yaml)
+Clc config (default is clc.yaml). This file is used to set the discovery url for the production cluster, file includes for the generated cloud-config and user-data files (optional), the location of the file that defines our units, and a directory holding custom templates for any or all of the generated files. If no override templates are supplied, the [stock templates](https://github.com/winkapp/libclc/tree/master/templates) from [libclc](https://github.com/winkapp/libclc) will be used. 
 
 ```
 discovery: { discovery url like https://discovery.etcd.io/3245sfgsdfgsdgsdfg34 }
 units: { path to your units config file }
 templates: { path to your template directory. optional }
+files: {specification for files to be included in cloud-config and user-data, to be included on new cluster machines}
+  - hostpath: {path to the file on the current systen, relative to the directory specified as the clc root}
+    path: {path the the desired destination of the file on cluster machines}
+    owner: {desired owner of the file on cluster machines}
+    permissions: {desired permissions of the file on cluster machines}
 ```
 
 ## rationale
