@@ -4,6 +4,12 @@
 
 This simple tool automates the tedious task of creating configurations for running your containers on vanilla CoreOS clusters in development and production.
 
+## installation
+
+If you are new to Go, Make sure your GOPATH is set, and that the GOPATH/bin folder is included in your PATH. For more details read [this](https://golang.org/doc/code.html#GOPATH). Once that is taken care of, just do this:
+
+    go get github.com/winkapp/clc
+
 ## usage
 
 The clc utility has three commands and two flags. All of the rest of the options are set through a configuration file. The format for using clc is:
