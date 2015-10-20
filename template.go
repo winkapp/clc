@@ -14,8 +14,9 @@ import (
 type ClcConfig struct {
   Discovery string
   Templates string
-  Units string
+  UnitDir string `yaml:"unit_directory"`
   Files []*libclc.File
+  UnitConfig *libclc.UnitConfig `yaml:"unit_config"`
 }
 
 var root string
@@ -25,7 +26,7 @@ var config ClcConfig
 func main() {
   // Figure out which directory we are going to prep files for
   flag.StringVar(&root, "root", "./", "Directory for configs and output.")
-  flag.StringVar(&config_file, "config", "clc.yaml", "Optional config file.")
+  flag.StringVar(&config_file, "config", "clc.yaml", "Base config file.")
   flag.Parse()
   command := flag.Arg(0)
 
@@ -60,12 +61,8 @@ func vagrant(path string) {
 }
 
 func units(path string) {
-  unitsYaml := getFileBytes(config.Units)
-  var units libclc.UnitConfig
-  err := yaml.Unmarshal(unitsYaml, &units)
-  checkError(err)
   t := unitsTemplate()
-  err = libclc.WriteUnits(&units, t, path + "/units")
+  err := libclc.WriteUnits(config.UnitConfig, t, config.UnitDir)
   checkError(err)
 }
 
