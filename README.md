@@ -20,35 +20,35 @@ The clc utility has three commands and two flags. All of the rest of the options
 
 `cc`
 
-  Create a new cloud config file for usage with an IaaS with stock support for file includes 
+  Create a new cloud config file for usage with an IaaS with stock support for file includes
 and etcd based env variables.
 
 `vagrant`
 
-  Creates a user-data file, Vagrantfile and config.rb for use on your local system 
+  Creates a user-data file, Vagrantfile and config.rb for use on your local system
 with options mirroring those of your cloud config.
 
 `units`
 
   Creates unit files for services defined in your configuration.
-  
+
 `new`
 
   Does all of the above. Intended for spinning up a new cluster.
-  
+
 ### flags
 
 `-config`
 
   Points to config file. (default "clc.yaml")
-  
+
 `-root`
 
   Points to root directory for configs and output. (default "./")
-  
+
 ### config file
 
-Clc config (default is clc.yaml). This file is used to set the discovery url for the production cluster, file includes for the generated cloud-config and user-data files (optional), the location of the file that defines our units, and a directory holding custom templates for any or all of the generated files. If no override templates are supplied, the [stock templates](https://github.com/winkapp/libclc/tree/master/templates) from [libclc](https://github.com/winkapp/libclc) will be used. 
+Clc config (default is clc.yaml). This file is used to set the discovery url for the production cluster, file includes for the generated cloud-config and user-data files (optional), the location of the file that defines our units, and a directory holding custom templates for any or all of the generated files. If no override templates are supplied, the [stock templates](https://github.com/winkapp/libclc/tree/master/templates) from [libclc](https://github.com/winkapp/libclc) will be used.
 
 ```
 discovery: { discovery url like https://discovery.etcd.io/3245sfgsdfgsdgsdfg34 }
@@ -62,11 +62,12 @@ files: {specification for files to be included in cloud-config and user-data, to
     path: {path the the desired destination of the file on cluster machines}
     owner: {desired owner of the file on cluster machines}
     permissions: {desired permissions of the file on cluster machines}
-    
+
 unit_config:
   units:
     - name: {name of the service}
       type: {multi|single - multi option names the file service-name@.service to enable running multiple instances}
+      sequence_number: {optional sequence number used to create versioned unit file names}
       restart: {always|no - always will restart the service after any exit}
       image: {docker image to run}
       command: {command to pass when starting container. leave blank to use default container command}
